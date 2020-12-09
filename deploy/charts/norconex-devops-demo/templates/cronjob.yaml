@@ -1,7 +1,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: "{{ template "norconex-devops-demo.fullname" . }}-demo"
+  name: "{{ template "norconex-devops-demo.fullname" . }}"
   namespace: {{ .Values.namespace }}
   {{- with .Values.persistent.annotations  }}
   annotations:
@@ -44,7 +44,11 @@ spec:
           - name: {{ template "norconex-devops-demo.fullname" . }}
             securityContext:
               {{- toYaml .Values.securityContext | nindent 14 }}
+            {{- if (eq .Values.image.registry "") }}
+            image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            {{- else }}
             image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            {{- end }}
             imagePullPolicy: {{ .Values.image.pullPolicy }}
             resources:
               requests:
@@ -59,6 +63,6 @@ spec:
             emptyDir: {}
           {{- else }}
             persistentVolumeClaim:
-              claimName: "{{ template "norconex-devops-demo.fullname" . }}-demo"
+              claimName: "{{ template "norconex-devops-demo.fullname" . }}"
           {{- end }}
           restartPolicy: OnFailure

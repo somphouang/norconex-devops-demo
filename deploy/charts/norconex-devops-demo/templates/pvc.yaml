@@ -2,8 +2,8 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: "{{ template "norconex-devops-demo.fullname" . }}-demo"
-  namespace: {{ .Values.namespace }}
+  name: "{{ template "norconex-devops-demo.fullname" . }}"
+  namespace: {{ .Release.Namespace }}
 {{- with .Values.persistent.annotations  }}
   annotations:
 {{ toYaml . | indent 4 }}
@@ -29,52 +29,33 @@ spec:
   {{- else }}
   awsElasticBlockStore:
     fsType: "ext4"
-    volumeID: "{{ template "norconex-devops-demo.fullname" . }}-demo"
+    volumeID: "{{ template "norconex-devops-demo.fullname" . }}"
   {{- end }}
   capacity:
     storage: "{{ .Values.persistent.size }}"
   persistentVolumeReclaimPolicy: "{{ .Values.persistent.reclaim }}"
   {{- end }}
 ---
-{{- else if .Values.persistent.useEFSvolume }}
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: "{{ template "norconex-devops-demo.fullname" . }}-demo"
-  namespace: {{ .Values.namespace }}
-  annotations:
-    volume.beta.kubernetes.io/storage-class: "aws-efs"
-  labels:
-    app: {{ template "norconex-devops-demo.fullname" . }}
-    release: "{{ .Release.Name }}"
-spec:
-  {{- if .Values.persistent.enabled }}
-  accessModes:
-    - ReadWriteMany
-  resources:
-    requests:
-      storage: "{{ .Values.persistent.size }}"
-  {{- end }}
 {{- else }}
-# use AWS EBS by default in deployment
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: "{{ template "norconex-devops-demo.fullname" . }}-demo"
-  namespace: {{ .Values.namespace }}
+  name: "{{ template "norconex-devops-demo.fullname" . }}"
+  namespace: {{ .Release.Namespace }}
 provisioner: kubernetes.io/aws-ebs
-reclaimPolicy: {{ .Values.persistent.reclaim }}
+reclaimPolicy: Retain
 allowVolumeExpansion: true
 parameters:
   type: gp2
   iopsPerGB: "10"
   fsType: ext4
 ---
+{{- end }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: "{{ template "norconex-devops-demo.fullname" . }}-demo"
-  namespace: {{ .Values.namespace }}
+  name: "{{ template "norconex-devops-demo.fullname" . }}"
+  namespace: {{ .Release.Namespace }}
 {{- with .Values.persistent.annotations  }}
   annotations:
 {{ toYaml . | indent 4 }}
@@ -93,10 +74,9 @@ spec:
   storageClassName: "{{ .Values.persistent.storageClass }}"
      {{- end }}
   {{- else }}
-  storageClassName: "{{ template "norconex-devops-demo.fullname" . }}-demo"
+  storageClassName: "{{ template "norconex-devops-demo.fullname" . }}"
   {{- end }}
   resources:
     requests:
       storage: "{{ .Values.persistent.size }}"
   {{- end }}
-{{- end }}

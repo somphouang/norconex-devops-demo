@@ -36,7 +36,7 @@ pipeline {
             steps {
                 script {
                   // Install the latest helm v3 chart using the default values.yaml with matching tag $BUILD_NUMBER
-                  sh 'helm upgrade --name demo-collector-chart -i deploy/charts/norconex-devops-demo --set image.tag=$BUILD_NUMBER'
+                  sh 'helm upgrade demo-collector-chart -i deploy/charts/norconex-devops-demo --set image.tag=$BUILD_NUMBER'
                 }
             }
         }

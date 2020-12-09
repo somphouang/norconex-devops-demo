@@ -3,16 +3,15 @@
 # Declare variables to be passed into your templates.
 
 # AWS EFS Provisioner deployment scaling pod count
-replicaCount: 2
+replicaCount: 1
 
 image:
-  registry: dockerhub.com
+  # Pull from public docker hub
+  registry: ""
   repository: somphouang/norconex-devops-demo
   tag: latest
   pullPolicy: IfNotPresent
-  pullSecret: regcred
-
-namespace: "default"
+  pullSecret: ""
 
 strategy:
   type: RollingUpdate
@@ -84,8 +83,6 @@ tolerations: []
 persistent:
   enabled: true
   localDebugTest: true
-  useEFSvolume: false
-  # if useEFSvolume is false, and localDebugTest is false, it use AWS EBS volume 
   annotations: {}
   ## database data Persistent Volume Storage Class
   ## If defined, storageClassName: <storageClass>
@@ -95,7 +92,7 @@ persistent:
   ##   GKE, AWS & OpenStack)
   ##
   ## Uncomment storageClass below for local k8s deployment and testing
-  #storageClass: manual
+  storageClass: manual
   accessMode: ReadWriteOnce
   size: 5Gi
   mountPath: /norconex/collector/examples-output/complex
