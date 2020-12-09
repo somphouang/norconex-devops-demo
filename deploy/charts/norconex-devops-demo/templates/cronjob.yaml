@@ -1,0 +1,64 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: "{{ template "norconex-devops-demo.fullname" . }}-demo"
+  namespace: {{ .Values.namespace }}
+  {{- with .Values.persistent.annotations  }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    app: {{ template "norconex-devops-demo.name" . }}
+spec:
+  schedule: "{{ .Values.crawlSchedule.demo }}"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            heritage: {{ .Release.Service | quote }}
+            release: {{ .Release.Name | quote }}
+            chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+            app: {{ template "norconex-devops-demo.name" . }}
+        spec:
+          securityContext:
+            {{- toYaml .Values.podSecurityContext | nindent 12 }}
+          imagePullSecrets:
+          - name: {{ .Values.image.pullSecret }}
+          containers:
+          - name: init
+            image: busybox:latest
+            securityContext:
+              runAsUser: 0
+            command: ['/bin/sh']
+            args: ['-c', 'chown -R {{ .Values.securityContext.runAsUser }}:{{ .Values.securityContext.runAsUser }} {{ .Values.persistent.mountPath | quote }}']
+            volumeMounts:
+            - name: data
+              mountPath: {{ .Values.persistent.mountPath | quote }}
+          - name: {{ template "norconex-devops-demo.fullname" . }}
+            securityContext:
+              {{- toYaml .Values.securityContext | nindent 14 }}
+            image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            resources:
+              requests:
+                cpu: "{{ .Values.resources.requests.cpu }}"
+                memory: "{{ .Values.resources.requests.memory }}"
+            volumeMounts:
+            - name: data
+              mountPath: {{ .Values.persistent.mountPath | quote }}
+          volumes:
+          - name: data
+          {{- if not .Values.persistent.enabled }}
+            emptyDir: {}
+          {{- else }}
+            persistentVolumeClaim:
+              claimName: "{{ template "norconex-devops-demo.fullname" . }}-demo"
+          {{- end }}
+          restartPolicy: OnFailure

@@ -1,0 +1,43 @@
+pipeline {
+    agent none 
+    
+    options {
+        // Only keep the number of most recent builds
+        buildDiscarder(logRotator(numToKeepStr:'5'))
+    }
+    stages {
+        stage('Build Docker Image') {
+            agent any
+            environment {
+                registry = "somphouag/norconex-devops-demo"
+                registryCredential = 'dockerLoginSecretCred'
+              }
+            // Build and push docker image only when in main branch
+            when {
+                branch "main"
+            }
+            steps {    
+                script {
+                    dockerImage = docker.build registry + ":$BUILD_NUMBER"
+                    docker.withRegistry( 'https://dockerhub.com', registryCredential ) {                                                   
+                        dockerImage.push()
+                    }
+                }
+                sh "docker rmi $registry:$BUILD_NUMBER"      
+            }                 
+        }
+        stage('Install Chart') {
+            agent any
+            }
+            // Build and push docker image only when in master branch
+            when {
+                branch "main"
+            }
+            steps {
+                script {
+                  // Install the latest helm v3 chart using the default values.yaml with matching tag $BUILD_NUMBER
+                  sh 'helm upgrade --name demo-collector-chart -i deploy/charts/norconex-devops-demo --set image.tag=$BUILD_NUMBER'
+                }
+            }
+        }
+ }

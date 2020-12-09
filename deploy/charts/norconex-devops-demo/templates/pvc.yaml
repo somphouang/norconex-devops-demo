@@ -1,0 +1,102 @@
+{{- if .Values.persistent.localDebugTest }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: "{{ template "norconex-devops-demo.fullname" . }}-demo"
+  namespace: {{ .Values.namespace }}
+{{- with .Values.persistent.annotations  }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+  labels:
+    app: {{ template "norconex-devops-demo.fullname" . }}
+    release: "{{ .Release.Name }}"
+spec:
+  {{- if .Values.persistent.enabled }}
+  accessModes:
+    - {{ .Values.persistent.accessMode | quote }}
+  {{- if (and (.Values.persistent.storageClass) (not (empty .Values.persistent.storageClass ))) }}
+     {{- if (eq "-" .Values.persistent.storageClass) }}
+  storageClassName: ""
+     {{- else }}
+  storageClassName: "{{ .Values.persistent.storageClass }}"
+     {{- end }}
+    {{- if (eq "manual" .Values.persistent.storageClass) }}
+  # Local test passing `--set persistent.storageClass=manual` in the helm command
+  hostPath:
+    path: "/data"
+    {{- end }}
+  {{- else }}
+  awsElasticBlockStore:
+    fsType: "ext4"
+    volumeID: "{{ template "norconex-devops-demo.fullname" . }}-demo"
+  {{- end }}
+  capacity:
+    storage: "{{ .Values.persistent.size }}"
+  persistentVolumeReclaimPolicy: "{{ .Values.persistent.reclaim }}"
+  {{- end }}
+---
+{{- else if .Values.persistent.useEFSvolume }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "{{ template "norconex-devops-demo.fullname" . }}-demo"
+  namespace: {{ .Values.namespace }}
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "aws-efs"
+  labels:
+    app: {{ template "norconex-devops-demo.fullname" . }}
+    release: "{{ .Release.Name }}"
+spec:
+  {{- if .Values.persistent.enabled }}
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: "{{ .Values.persistent.size }}"
+  {{- end }}
+{{- else }}
+# use AWS EBS by default in deployment
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: "{{ template "norconex-devops-demo.fullname" . }}-demo"
+  namespace: {{ .Values.namespace }}
+provisioner: kubernetes.io/aws-ebs
+reclaimPolicy: {{ .Values.persistent.reclaim }}
+allowVolumeExpansion: true
+parameters:
+  type: gp2
+  iopsPerGB: "10"
+  fsType: ext4
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "{{ template "norconex-devops-demo.fullname" . }}-demo"
+  namespace: {{ .Values.namespace }}
+{{- with .Values.persistent.annotations  }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+  labels:
+    app: {{ template "norconex-devops-demo.fullname" . }}
+    release: "{{ .Release.Name }}"
+spec:
+  {{- if .Values.persistent.enabled }}
+  accessModes:
+    - {{ .Values.persistent.accessMode | quote }}
+  {{- if .Values.persistent.storageClass }}
+     {{- if (eq "-" .Values.persistent.storageClass) }}
+  storageClassName: ""
+     {{- else }}
+  storageClassName: "{{ .Values.persistent.storageClass }}"
+     {{- end }}
+  {{- else }}
+  storageClassName: "{{ template "norconex-devops-demo.fullname" . }}-demo"
+  {{- end }}
+  resources:
+    requests:
+      storage: "{{ .Values.persistent.size }}"
+  {{- end }}
+{{- end }}

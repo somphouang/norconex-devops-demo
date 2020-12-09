@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "norconex-devops-demo.fullname" . }}-test-filesystem"
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "norconex-devops-demo.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ["sh", "-c", "sleep 2", "ls -alh ."]
+  restartPolicy: Never
