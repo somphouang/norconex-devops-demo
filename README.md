@@ -580,6 +580,23 @@ Runtime:
 
 ```
 
+### Clean Up
+
+Cleaning up deployment is easy with Helm, run
+
+```
+helm delete norconex-devops-demo
+```
+
+Output confirmed the `Helm` deployment delete
+
+```
+release "norconex-devops-demo" uninstalledi```
+
+Run the `kubectl get all,pv,pvc,cronjob,job,pod` will show
+no resources left. 
+
+
 
 
 ## Build DevOps 
