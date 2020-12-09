@@ -56,7 +56,7 @@ Below steps are the overview for my quick demo exploring some of the ways to set
          * `pvc.yaml` to create kubernetes persistent volume and persistent volume claim that the Norconex Collector crawl job will use on the next recrawl job run.
 
 4. Simple build using Jenkins
-    * Overview the creation of Jenkins Build Server
+    * Overview of Jenkins Build job pipeline script
 
 ## Test Locally
 
