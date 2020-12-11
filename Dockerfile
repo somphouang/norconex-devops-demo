@@ -69,9 +69,6 @@ RUN chown -R "${COLLECTOR_USER}:${COLLECTOR_GROUP}" "${NORCONEX_HOME}";
 # Allow execute for `collector-http.sh` in the collector
 RUN chmod +x "${COLLECTOR_HOME}/collector-http.sh";
 
-# Add below to debug, comment out in production version
-RUN apt-get install nginx -y;
-
 USER "$COLLECTOR_USER"
 VOLUME "$WORKDIR"
 
