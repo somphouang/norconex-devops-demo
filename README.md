@@ -1,6 +1,11 @@
 # Overview
 
-Building a very simple demo using the Norconex Collector v3 example configuration
+### New Update using Azure DevOps Pipeline to automatte CI and push to Docker Hub
+* Visit Azure DevOps pipeline builds [here](https://dev.azure.com/somp/Norconex-Web-Crawler-Devops/_build)
+* Azure DevOps pipeline [here](https://dev.azure.com/somp/_git/Norconex-Web-Crawler-Devops?path=/azure-pipelines.yml)
+
+### General Overview
+Building a very simple demo using the Norconex Web Crawler  v3 example configuration
 included with the binary distribution download.  The minimum demo will crawl
 few Norconex open-source web page and commit to xml file in the filesystem of
 the container.  
@@ -35,7 +40,7 @@ Schedule provided in the Helm `values.yaml`
 
 Below steps are the overview for my quick demo exploring some of the ways to setup:
 
-1. Demo use the default [Norconex Collector Download | Norconex HTTP Collector](https://opensource.norconex.com/collectors/http/download#v3) with Filesystem Committer.  (The other choices of Committers can be found here, [Committers (norconex.com)](https://opensource.norconex.com/committers/) )
+1. Demo use the default [Norconex Collector Download | Norconex Web Crawler](https://opensource.norconex.com/collectors/http/download#v3) with Filesystem Committer.  (The other choices of Committers can be found here, [Committers (norconex.com)](https://opensource.norconex.com/committers/) )
     * Build container image using Dockerfile
     * Setup a Git Repository file structure for Container Image build
     * Guide to build and test run using the created Dockerfile
