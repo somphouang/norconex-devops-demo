@@ -32,4 +32,4 @@ stages:
         repository: 'somphouang/norconex-devops-demo'
         command: 'buildAndPush'
         Dockerfile: '**/Dockerfile'
-
+        tags: 'latest'
